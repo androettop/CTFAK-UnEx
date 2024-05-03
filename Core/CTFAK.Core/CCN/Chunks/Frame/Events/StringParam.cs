@@ -1,5 +1,6 @@
 ﻿using CTFAK.Memory;
 using CTFAK.Utils;
+using Newtonsoft.Json.Linq;
 
 namespace CTFAK.MMFParser.EXE.Loaders.Events.Parameters
 {
@@ -7,21 +8,19 @@ namespace CTFAK.MMFParser.EXE.Loaders.Events.Parameters
     {
         public string Value;
 
-
-
         public override void Read(ByteReader reader)
         {
-            Value = reader.ReadAscii();
+            Value = reader.ReadYuniversal();
         }
 
         public override void Write(ByteWriter Writer)
         {
-            Writer.WriteAscii(Value);
+            Writer.WriteUnicode(Value);
         }
 
         public override string ToString()
         {
-            return $"String: {Value}";
+            return $"String: {Value} ({Value.Length})";
         }
     }
 }

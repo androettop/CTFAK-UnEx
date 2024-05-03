@@ -15,57 +15,51 @@ namespace CTFAK.EXE
     public class PackData
     {
         public List<PackFile> Items = new List<PackFile>();
-        private byte[] _header;
         public uint FormatVersion;
         public void Read(ByteReader reader)
         {
             Logger.Log("Reading PackData", false);
             long start = reader.Tell();
-            _header = reader.ReadBytes(8);
+            reader.Skip(12);
+            int dataSize = reader.ReadInt32();
 
-            uint headerSize = reader.ReadUInt32();
-            Debug.Assert(headerSize == 32);
-            uint dataSize = reader.ReadUInt32();
-
-            reader.Seek((int)(start + dataSize - 32));
+            reader.Seek(start + dataSize - 32);
             var uheader = reader.ReadAscii(4);
+            Settings.gameType = Settings.GameType.NORMAL;
             if (uheader == "PAMU")
             {
-                Settings.gameType = Settings.GameType.NORMAL;
                 Settings.Unicode = true;
             }
             else if (uheader == "PAME")
             {
-                if (Settings.gameType != Settings.GameType.MMF15)
-                    Settings.gameType = Settings.GameType.MMF2;
+                if (!Settings.Old)
+                    Settings.gameType |= Settings.GameType.MMF2;
                 Settings.Unicode = false;
             }
             Logger.Log($"Found {uheader} header", false);
-            reader.Seek(start + 16);
-
-            FormatVersion = reader.ReadUInt32();
-            var check = reader.ReadInt32();
-            //Removing this seemed to not break anything, adding it breaks things for me.
-            //Debug.Assert(check == 0);
-            check = reader.ReadInt32();
-            Debug.Assert(check == 0);
-
-            uint count = reader.ReadUInt32();
-
-            long offset = reader.Tell();
-            for (int i = 0; i < count; i++)
+            var runtimeVersion = reader.ReadInt16();
+            if (runtimeVersion != 770)
             {
-                if (!reader.HasMemory(2)) break;
-                UInt16 value = reader.ReadUInt16();
-                if (!reader.HasMemory(value)) break;
-                reader.ReadBytes(value);
-                reader.Skip(value);
-                if (!reader.HasMemory(value)) break;
+                reader.Seek(dataSize);
+                uheader = reader.ReadAscii(4);
+                if (uheader == "PAMU")
+                {
+                    Settings.Unicode = true;
+                }
+                else if (uheader == "PAME")
+                {
+                    if (!Settings.Old)
+                        Settings.gameType |= Settings.GameType.MMF2;
+                    Settings.Unicode = false;
+                }
+                reader.Skip(2);
             }
+            reader.Skip(6);
+            var fusionBuild = reader.ReadInt32();
 
-            var newHeader = reader.ReadAscii(4);
-            bool hasBingo = newHeader != "PAME" && newHeader != "PAMU";
-            reader.Seek(offset);
+            reader.Seek(start + 28);
+            uint count = reader.ReadUInt32();
+            bool hasBingo = fusionBuild > 231;
             for (int i = 0; i < count; i++)
             {
                 var item = new PackFile();
@@ -87,7 +81,8 @@ namespace CTFAK.EXE
         {
             ushort len = exeReader.ReadUInt16();
             PackFilename = exeReader.ReadYuniversal(len);
-            _bingo = exeReader.ReadInt32();
+            if (HasBingo)
+                _bingo = exeReader.ReadInt32();
             size = exeReader.ReadInt32();
             if (exeReader.PeekInt16() == -9608)
             {

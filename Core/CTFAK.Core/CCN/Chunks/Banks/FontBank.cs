@@ -18,16 +18,12 @@ namespace CTFAK.CCN.Chunks.Banks
         public bool Debug;
         public List<FontItem> Items=new List<FontItem>();
 
-
-
-
         public override void Read(ByteReader reader)
         {
-
             if ((Settings.Old || Settings.Fusion3Seed) && !Settings.isMFA) return;//TODO FIX FIX FIX
             var count = reader.ReadInt32();
             int offset = 0;
-            if (Settings.Build > 284 && !Debug) offset = -1;
+            //if (Settings.Build > 284 && !Debug) offset = -1;
 
             Items = new List<FontItem>();
             for (int i = 0; i < count; i++)
@@ -39,8 +35,6 @@ namespace CTFAK.CCN.Chunks.Banks
                 item.Handle += (uint)offset;
                 Items.Add(item);
             }
-
-
         }
         public override void Write(ByteWriter writer)
         {
@@ -49,11 +43,9 @@ namespace CTFAK.CCN.Chunks.Banks
             {
                 item.Write(writer);
             }
-
         }
-
-
     }
+
     public class FontItem : ChunkLoader
     {
         public bool Compressed;

@@ -34,7 +34,8 @@ namespace CTFAK.MFA
         public object Value;
         public string Name = "";
 
-
+        public ValueItem() {}
+        public ValueItem(object value) => Value = value;
 
         public override void Read(ByteReader reader)
         {

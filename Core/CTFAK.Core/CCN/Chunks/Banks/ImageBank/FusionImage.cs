@@ -67,7 +67,6 @@ namespace CTFAK.Core.CCN.Chunks.Banks.ImageBank
         public Bitmap realBitmap;
         public int references;
         public Color Transparent;
-        public static bool logged = false;
 
         public Bitmap bitmap
         {
@@ -77,17 +76,11 @@ namespace CTFAK.Core.CCN.Chunks.Banks.ImageBank
                 {
                     realBitmap = new Bitmap(Width, Height);
                     var bmpData = realBitmap.LockBits(new Rectangle(0, 0, Width, Height),
-                                                      ImageLockMode.WriteOnly, 
+                                                      ImageLockMode.WriteOnly,
                                                       PixelFormat.Format32bppArgb);
 
 
                     byte[] colorArray = null;
-
-                    //if (!logged)
-                    //{
-                        //logged = true;
-                        //Logger.Log("GRAPHIC MODE: " + GraphicMode);
-                    //}
 
                     switch (GraphicMode)
                     {
@@ -107,19 +100,19 @@ namespace CTFAK.Core.CCN.Chunks.Banks.ImageBank
                             if (Settings.Android)
                                 colorArray = ImageTranslator.AndroidMode4ToRGBA(imageData, Width, Height, false);
                             else
-                                colorArray = ImageTranslator.Normal24BitMaskedToRGBA(imageData, Width, Height, Flags["Alpha"], Transparent, Settings.F3);
+                                colorArray = ImageTranslator.Normal24BitMaskedToRGBA(imageData, Width, Height, Flags["Alpha"], Transparent, Flags["RLE"] || Flags["RLEW"] || Flags["RLET"], Settings.F3);
                             break;
                         case 5:
-                            colorArray = ImageTranslator.AndroidMode5ToRGBA(imageData, Width, Height, Flags["Alpha"]);
+                            colorArray = ImageTranslator.AndroidMode5ToRGBA(imageData, Width, Height, Flags["Alpha"], Flags["RLE"] || Flags["RLEW"] || Flags["RLET"]);
                             break;
                         case 6:
                             colorArray = ImageTranslator.Normal15BitToRGBA(imageData, Width, Height, false, Transparent);
                             break;
                         case 7:
-                            colorArray = ImageTranslator.Normal16BitToRGBA(imageData, Width, Height, false, Transparent);
+                            colorArray = ImageTranslator.Normal16BitToRGBA(imageData, Width, Height, false, Transparent, Flags["RLE"] || Flags["RLEW"] || Flags["RLET"]);
                             break;
                         case 8:
-                            colorArray = ImageTranslator.TwoFivePlusToRGBA(imageData, Width, Height, Flags["Alpha"], Transparent, Flags["RGBA"], Settings.Fusion3Seed);
+                            colorArray = ImageTranslator.TwoFivePlusToRGBA(imageData, Width, Height, Flags["Alpha"], Transparent, Flags["RGBA"], Settings.F3);
                             break;
                     }
                     if (colorArray == null)
@@ -421,22 +414,20 @@ namespace CTFAK.Core.CCN.Chunks.Banks.ImageBank
                     {
                         imageData = ImageTranslator.AndroidMode4ToRGBA(imageData, Width, Height, Flags["Alpha"]);
                         imageData = ImageTranslator.RGBAToRGBMasked(imageData, Width, Height, Flags["Alpha"]);
-                        GraphicMode = 4;
                     }
                     else if (Settings.F3)
                     {
-                        imageData = ImageTranslator.Normal24BitMaskedToRGBA(imageData, Width, Height, Flags["Alpha"], Transparent, Settings.Fusion3Seed);
+                        imageData = ImageTranslator.Normal24BitMaskedToRGBA(imageData, Width, Height, Flags["Alpha"], Transparent, Flags["RLE"] || Flags["RLEW"] || Flags["RLET"], true);
                         imageData = ImageTranslator.RGBAToRGBMasked(imageData, Width, Height, Flags["Alpha"]);
-                        GraphicMode = 4;
                     }
                     break;
                 case 5:
-                    imageData = ImageTranslator.AndroidMode5ToRGBA(imageData, Width, Height, Flags["Alpha"]);
+                    imageData = ImageTranslator.AndroidMode5ToRGBA(imageData, Width, Height, Flags["Alpha"], Flags["RLE"] || Flags["RLEW"] || Flags["RLET"]);
                     imageData = ImageTranslator.RGBAToRGBMasked(imageData, Width, Height, Flags["Alpha"]);
                     GraphicMode = 4;
                     break;
                 case 8:
-                    imageData = ImageTranslator.TwoFivePlusToRGBA(imageData, Width, Height, Flags["Alpha"], Transparent, Flags["RGBA"], Settings.Fusion3Seed);
+                    imageData = ImageTranslator.TwoFivePlusToRGBA(imageData, Width, Height, Flags["Alpha"], Transparent, Flags["RGBA"], Settings.F3);
                     imageData = ImageTranslator.RGBAToRGBMasked(imageData, Width, Height, Flags["Alpha"], Transparent, Flags["RGBA"]);
                     GraphicMode = 4;
                     break;

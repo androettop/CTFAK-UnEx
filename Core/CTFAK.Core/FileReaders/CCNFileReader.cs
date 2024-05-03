@@ -20,6 +20,7 @@ namespace CTFAK.EXE
 
         public void LoadGame(string gamePath)
         {
+            CTFAKCore.currentReader = this;
             var reader = new ByteReader(gamePath, System.IO.FileMode.Open);
 
             if (reader.PeekInt32() == 2004318071)

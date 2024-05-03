@@ -102,7 +102,7 @@ namespace CTFAK.CCN.Chunks.Objects
         public override void Read(ByteReader reader)
         {
             var currentPosition = reader.Tell();
-            if (Settings.Build >= 284 && Settings.gameType==Settings.GameType.NORMAL)
+            if (Settings.Build >= 284 && Settings.Normal)
             {
                 var size = reader.ReadInt32();
                 //File.WriteAllBytes($"FNAFSLTest\\{Utils.Utils.ClearName(Parent.name + "-" + Parent.handle)}.chunk", reader.ReadBytes(size - 4));
@@ -149,7 +149,7 @@ namespace CTFAK.CCN.Chunks.Objects
                 _fadeinOffset = reader.ReadUInt32();
                 _fadeoutOffset = reader.ReadUInt32();
             }
-            else if(Settings.gameType==Settings.GameType.NORMAL || Settings.gameType == Settings.GameType.MMF2)
+            else if(Settings.Normal || Settings.MMF2)
             {
                 var size = reader.ReadInt32();
                 _movementsOffset = reader.ReadInt16();

@@ -15,12 +15,14 @@ namespace CTFAK.Core.CCN.Chunks.Objects
 
         public override void Read(ByteReader reader)
         {
+            reader.Skip(4);
             odCx = reader.ReadInt32();
             odCy = reader.ReadInt32();
             odVersion = reader.ReadInt16();
             odNStartFrame = reader.ReadInt16();
             odOptions = reader.ReadInt32();
-            //odName = reader.ReadYuniversal();
+            reader.Skip(8);
+            odName = reader.ReadYuniversal();
         }
 
         public override void Write(ByteWriter Writer)

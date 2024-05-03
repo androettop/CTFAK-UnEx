@@ -19,7 +19,6 @@ using Microsoft.VisualBasic;
 using Action = CTFAK.CCN.Chunks.Frame.Action;
 using Constants = CTFAK.CCN.Constants;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using CTFAK.Core.Properties;
 using CTFAK.Core.CCN.Chunks.Banks;
 using CTFAK.MMFParser.EXE.Loaders.Events.Parameters;
@@ -54,6 +53,7 @@ namespace CTFAK.Tools
 
             Settings.gameType = originalGameType;
             Settings.isMFA = false;
+            Logger.Log("GameType: " + Settings.GetGameTypeStr());
 
             mfa.Name = game.name;
             mfa.LangId = 0;//8192;
@@ -204,25 +204,14 @@ namespace CTFAK.Tools
             mfa.GraphicFlags["Direct3D11"] = game.header.OtherFlags["Direct3D8or11"] && game.header.OtherFlags["Direct3D9or11"];
             mfa.GraphicFlags["PremultipliedAlpha"] = game.ExtHeader.Flags["PremultipliedAlpha"];
 
-            try
-            {
+            if (game.globalValues != null)
                 foreach (var globalValue in game.globalValues.Items)
-                {
-                    mfa.GlobalValues.Items.Add(new ValueItem()
-                    {
-                        Value = globalValue,
-                    });
-                }
+                    mfa.GlobalValues.Items.Add(new ValueItem(globalValue));
 
+            if (game.globalStrings != null)
                 foreach (var globalString in game.globalStrings.Items)
-                {
-                    mfa.GlobalStrings.Items.Add(new ValueItem()
-                    {
-                        Value = globalString,
-                    });
-                }
-            }
-            catch { }
+                    mfa.GlobalStrings.Items.Add(new ValueItem(globalString));
+
             mfa.WindowX = game.header.WindowWidth;
             mfa.WindowY = game.header.WindowHeight;
             mfa.BorderColor = game.header.BorderColor;
@@ -233,7 +222,7 @@ namespace CTFAK.Tools
             mfa.BuildType = 0;
             mfa.BuildPath = game.targetFilename;
             mfa.CommandLine = "";
-            mfa.Aboutbox = game.aboutText ?? "Decompiled with CTFAK 2.0";
+            mfa.Aboutbox = game.aboutText + " Decompiled with CTFAK 2.0";
             //TODO: Controls
 
             //Object Section
@@ -599,15 +588,15 @@ namespace CTFAK.Tools
                     }
                 }
             }
-            Settings.gameType = Settings.GameType.NORMAL;
+            //Settings.gameType = Settings.GameType.NORMAL;
 
             var outPath = reader.getGameData().name ?? "Unknown Game";
             Regex rgx = new Regex("[^a-zA-Z0-9 -]");
             outPath = rgx.Replace(outPath, "").Trim(' ');
             Directory.CreateDirectory($"Dumps\\{outPath}");
             mfa.Write(new ByteWriter(new FileStream($"Dumps\\{outPath}\\{Path.GetFileNameWithoutExtension(game.editorFilename)}.mfa", FileMode.Create)));
-            Settings.gameType = originalGameType;
-            game.productBuild = orginalBuild;
+            //Settings.gameType = originalGameType;
+            //game.productBuild = orginalBuild;
 
             static MFATransition ConvertTransition(Transition gameTrans)
             {
@@ -642,7 +631,7 @@ namespace CTFAK.Tools
                 newItem.Flags = item.Flags;
                 int type = 2;
                 bool noicon = false;
-                Bitmap iconBmp = null;
+                Bitmap iconBmp = Resources.Active;
                 if (newItem.ObjectType >= 32)
                 {
                     CTFAK.CCN.Chunks.Extension ext = null;
@@ -955,14 +944,8 @@ namespace CTFAK.Tools
                     }
 
                     if (itemLoader.Strings != null)
-                    {
                         for (int j = 0; j < itemLoader.Strings.Items.Count; j++)
-                        {
-                            var newStr = new ValueItem();
-                            newStr.Value = itemLoader.Strings.Items[j];
-                            newObject.Strings.Items.Add(newStr);
-                        }
-                    }
+                            newObject.Strings.Items.Add(new ValueItem(itemLoader.Strings.Items[j]));
 
                     if (itemLoader.Movements == null)
                     {

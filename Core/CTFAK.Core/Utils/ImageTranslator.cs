@@ -14,44 +14,75 @@ namespace CTFAK.Core.Utils
         {
             if (modular) return (bytes - width * pointSize % bytes) % bytes;
 
-            var pad = bytes - width * pointSize % bytes;
+            var pad = bytes - (width * pointSize % bytes);
             if (pad == bytes) return 0;
 
             return (int)Math.Ceiling(pad / (float)pointSize);
         }
 
-        public static byte[] Normal24BitMaskedToRGBA(byte[] imageData, int width, int height, bool alpha, Color transparent, bool flipRGB = false)
+        public static byte[] Normal24BitMaskedToRGBA(byte[] imageData, int width, int height, bool alpha, Color transparent, bool RLE, bool flipRGB = false)
         {
             byte[] colorArray = new byte[width * height * 4];
             int stride = width * 4;
             int pad = GetPadding(width, 3);
             int position = 0;
+            int command = imageData[position];
+            bool rleLoop = false;
+            bool rleCommander = false;
+            if (RLE)
+                position++;
+
+            byte r = 0;
+            byte g = 0;
+            byte b = 0;
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
+                    if (!RLE || !rleLoop || rleCommander)
+                    {
+                        r = imageData[position++];
+                        g = imageData[position++];
+                        b = imageData[position++];
+                        rleLoop = true;
+                    }
+
                     int newPos = (y * stride) + (x * 4);
                     if (flipRGB)
                     {
-                        colorArray[newPos + 0] = imageData[position + 2];
-                        colorArray[newPos + 1] = imageData[position + 1];
-                        colorArray[newPos + 2] = imageData[position];
+                        colorArray[newPos + 0] = b;
+                        colorArray[newPos + 1] = g;
+                        colorArray[newPos + 2] = r;
                     }
                     else
                     {
-                        colorArray[newPos + 0] = imageData[position];
-                        colorArray[newPos + 1] = imageData[position + 1];
-                        colorArray[newPos + 2] = imageData[position + 2];
+                        colorArray[newPos + 0] = r;
+                        colorArray[newPos + 1] = g;
+                        colorArray[newPos + 2] = b;
                     }
                     colorArray[newPos + 3] = 255;
                     if (!alpha)
                     {
-                        if (colorArray[newPos + 0] == transparent.R && 
+                        if (colorArray[newPos + 0] == transparent.B &&
                             colorArray[newPos + 1] == transparent.G &&
-                            colorArray[newPos + 2] == transparent.B)
+                            colorArray[newPos + 2] == transparent.R)
                             colorArray[newPos + 3] = 0;
                     }
-                    position += 3;
+
+                    if (RLE && --command == 0)
+                    {
+                        command = imageData[position++];
+                        rleCommander = false;
+                        rleLoop = false;
+
+                        if (command > 128)
+                        {
+                            command -= 128;
+                            rleCommander = true;
+                        }
+                        else if (command == 0)
+                            rleLoop = true;
+                    }
                 }
 
                 position += pad * 3;
@@ -74,24 +105,38 @@ namespace CTFAK.Core.Utils
 
             return colorArray;
         }
-        public static byte[] Normal16BitToRGBA(byte[] imageData, int width, int height, bool alpha, Color transparent)
+        public static byte[] Normal16BitToRGBA(byte[] imageData, int width, int height, bool alpha, Color transparent, bool RLE)
         {
             byte[] colorArray = new byte[width * height * 4];
             int stride = width * 4;
             int pad = GetPadding(width, 2);
             int position = 0;
+            int command = imageData[position];
+            bool rleLoop = false;
+            bool rleCommander = false;
+            if (RLE)
+                position++;
+
+            byte r = 0;
+            byte g = 0;
+            byte b = 0;
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    UInt16 newShort = (ushort)(imageData[position] | imageData[position + 1] << 8);
-                    byte r = (byte)((newShort & 63488) >> 11);
-                    byte g = (byte)((newShort & 2016) >> 5);
-                    byte b = (byte)((newShort & 31));
+                    if (!RLE || !rleLoop || rleCommander)
+                    {
+                        ushort newShort = (ushort)(imageData[position++] | imageData[position++] << 8);
+                        r = (byte)((newShort & 63488) >> 11);
+                        g = (byte)((newShort & 2016) >> 5);
+                        b = (byte)((newShort & 31));
 
-                    r = (byte)(r << 3);
-                    g = (byte)(g << 2);
-                    b = (byte)(b << 3);
+                        r = (byte)(r << 3);
+                        g = (byte)(g << 2);
+                        b = (byte)(b << 3);
+                        rleLoop = true;
+                    }
+
                     int newPos = (y * stride) + (x * 4);
                     colorArray[newPos + 2] = r;
                     colorArray[newPos + 1] = g;
@@ -99,12 +144,26 @@ namespace CTFAK.Core.Utils
                     colorArray[newPos + 3] = 255;
                     if (!alpha)
                     {
-                        if (colorArray[newPos + 2] == transparent.R && 
+                        if (colorArray[newPos + 2] == transparent.R &&
                             colorArray[newPos + 1] == transparent.G &&
                             colorArray[newPos + 0] == transparent.B)
                             colorArray[newPos + 3] = 0;
                     }
-                    position += 2;
+
+                    if (RLE && --command == 0)
+                    {
+                        command = imageData[position++];
+                        rleCommander = false;
+                        rleLoop = false;
+
+                        if (command > 128)
+                        {
+                            command -= 128;
+                            rleCommander = true;
+                        }
+                        else if (command == 0)
+                            rleLoop = true;
+                    }
                 }
 
                 position += pad * 2;
@@ -337,11 +396,11 @@ namespace CTFAK.Core.Utils
             }
             return colorArray;
         }
-        public static byte[] AndroidMode5ToRGBA(byte[] imageData, int width, int height, bool alpha)
+        public static byte[] AndroidMode5ToRGBA(byte[] imageData, int width, int height, bool alpha, bool RLE)
         {
             var img = new FusionImage();
-            img.FromBitmap((Bitmap)Bitmap.FromStream(new MemoryStream(imageData)));
-            return Normal24BitMaskedToRGBA(img.imageData, width, height, true, Color.Black);
+            //img.FromBitmap((Bitmap)Bitmap.FromStream(new MemoryStream(imageData)));
+            return Normal24BitMaskedToRGBA(img.imageData, width, height, true, Color.Black, RLE);
         }
         public static byte[] TwoFivePlusToRGBA(byte[] imageData, int width, int height, bool alpha, Color transparent, bool RGBA, bool flipRGB = false)
         {
@@ -423,9 +482,9 @@ namespace CTFAK.Core.Utils
 
                     if (!alpha && RGBA && imageData[pos + 3] != 255)
                     {
-                        colorArray[position + 0] = transparent.R;
+                        colorArray[position + 2] = transparent.R;
                         colorArray[position + 1] = transparent.G;
-                        colorArray[position + 2] = transparent.B;
+                        colorArray[position + 0] = transparent.B;
                     }
 
                     position += 3;

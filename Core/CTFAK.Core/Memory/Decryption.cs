@@ -9,55 +9,72 @@ namespace CTFAK.Memory
 {
     public static class Decryption
     {
-        public static byte[] _decryptionKey;
-        //public static byte MagicChar = 99;
+        private static byte[] decodeBuffer = new byte[256];
+        public static bool Valid;
         public static byte MagicChar = 54;
 
-        public static byte[] KeyString(string str)
+        // Thx LAK
+        // It's 0:40, I might revisit this part again when I don't feel as crappy
+        // I might even just redo it with a single byte array with 256 elements
+        // Revisiting this day after, I literally did just that. Wasn't hard at all
+        // But hey, at least this works ;)
+        public static void MakeKey(string data1, string data2, string data3)
         {
-            // thank you LAK
-            // fuck you openai
-            // this code is quite stupid, but i will not touch it for now
-            var result = new List<byte>();
-            result.Capacity = str.Length * 2;
-            foreach (char code in str)
-            {
-                if ((code & 0xFF) != 0)
-                    result.Add((byte)(code & 0xFF));
+            var MagicKey = MakeKeyCombined(Encoding.UTF8.GetBytes(data1 + data2 + data3));
+            for (int i = 0; i < 256; i++)
+                decodeBuffer[i] = (byte)i;
 
-                if (((code >> 8) & 0xFF) != 0)
-                    result.Add((byte)((code >> 8) & 0xFF));
+            Func<byte, byte> rotate = (byte value) => (byte)((value << 7) | (value >> 1));
+            byte accum = MagicChar;
+            byte hash = MagicChar;
+
+            bool never_reset_key = true;
+
+            byte i2 = 0;
+            byte key = 0;
+            for (uint i = 0; i < 256; ++i, ++key)
+            {
+                hash = rotate(hash);
+
+                if (never_reset_key)
+                {
+                    accum += ((hash & 1) == 0) ? (byte)2 : (byte)3;
+                    accum *= MagicKey[key];
+                }
+
+                if (hash == MagicKey[key])
+                {
+                    hash = rotate(MagicChar);
+                    key = 0;
+
+                    never_reset_key = false;
+                }
+
+                i2 += (byte)((hash ^ MagicKey[key]) + decodeBuffer[i]);
+
+                (decodeBuffer[i2], decodeBuffer[i]) = (decodeBuffer[i], decodeBuffer[i2]);
             }
-            return result.ToArray();
+            Valid = true;
         }
 
         public static byte[] MakeKeyCombined(byte[] data)
         {
-            int dataLen = data.Length;
+            int dataLen = Math.Min(128, data.Length);
             Array.Resize(ref data, 256);
+            Array.Clear(data, 128, 128);
 
-            byte lastKeyByte = MagicChar;
-            byte v34 = MagicChar;
+            byte accum = MagicChar;
+            byte hash = MagicChar;
 
-            for (int i = 0; i <= dataLen; i++)
+            for (int i = 0; i <= dataLen; ++i)
             {
-                v34 = (byte)((v34 << 7) + (v34 >> 1));
-                data[i] ^= v34;
-                lastKeyByte += (byte)(data[i] * ((v34 & 1) + 2));
+                hash = (byte)((hash << 7) + (hash >> 1));
+                data[i] ^= hash;
+                accum += (byte)(data[i] * ((hash & 1) + 2));
             }
 
-            data[dataLen + 1] = lastKeyByte;
+            data[dataLen + 1] = accum;
             return data;
-        }
-
-        public static void MakeKey(string data1, string data2, string data3)
-        {
-            var bytes = new List<byte>();
-            bytes.AddRange(KeyString(data1 ?? ""));
-            bytes.AddRange(KeyString(data2 ?? ""));
-            bytes.AddRange(KeyString(data3 ?? ""));
-            _decryptionKey = MakeKeyCombined(bytes.ToArray());
-            InitDecryptionTable(_decryptionKey, Decryption.MagicChar);
         }
 
         public static byte[] DecodeMode3(byte[] chunkData, int chunkId, out int decompressed)
@@ -80,69 +97,9 @@ namespace CTFAK.Memory
             }
         }
 
-        //private static byte* decodeBuffer;
-        private static byte[] decodeBuffer = new byte[256];
-        public static bool valid;
-
-        // Thx LAK
-        // It's 0:40, I might revisit this part again when I don't feel as crappy
-        // I might even just redo it with a single byte array with 256 elements
-        // But hey, at least this works ;)
-        public static bool InitDecryptionTable(byte[] magic_key, byte magic_char)
-        {
-            //decodeBuffer = (byte*)Marshal.AllocHGlobal(256);
-            for (int i = 0; i < 256; i++)
-            {
-                decodeBuffer[i] = (byte)i;
-            }
-
-            Func<byte, byte> rotate = (byte value) => (byte)((value << 7) | (value >> 1));
-
-            byte accum = (byte)magic_char;
-            byte hash = (byte)magic_char;
-
-            bool never_reset_key = true;
-
-            byte i2 = 0;
-            byte key = 0;
-            for (uint i = 0; i < 256; ++i, ++key)
-            {
-
-                hash = rotate(hash);
-
-                if (never_reset_key)
-                {
-                    accum += ((hash & 1) == 0) ? (byte)2 : (byte)3;
-                    accum *= magic_key[key];
-                }
-
-                if (hash == magic_key[key])
-                {
-                    /*if (never_reset_key && !(accum == *(key + 1)))
-                    {
-                        // Ignoring this, because it's not being triggered by the same input data in c++
-
-                        //Console.WriteLine("Failed To Generate Decode Table");
-                        //return false;
-                    }*/
-
-                    hash = rotate((byte)magic_char);
-                    key = 0;
-
-                    never_reset_key = false;
-                }
-
-                i2 += (byte)((hash ^ magic_key[key]) + decodeBuffer[i]);
-
-                (decodeBuffer[i2], decodeBuffer[i]) = (decodeBuffer[i], decodeBuffer[i2]);
-            }
-            valid = true;
-            return true;
-        }
-
         public static bool TransformChunk(byte[] chunk)
         {
-            if (!valid) return false;
+            if (!Valid) return false;
             byte[] tempBuf = new byte[256];
             Array.Copy(decodeBuffer, tempBuf, 256);
 

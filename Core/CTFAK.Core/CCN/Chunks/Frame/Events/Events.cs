@@ -6,7 +6,6 @@ using CTFAK.Memory;
 using CTFAK.MMFParser.EXE.Loaders.Events.Expressions;
 using CTFAK.MMFParser.EXE.Loaders.Events.Parameters;
 using CTFAK.Utils;
-using Microsoft.AspNetCore.Http.Features;
 
 namespace CTFAK.CCN.Chunks.Frame
 {
@@ -498,6 +497,7 @@ namespace CTFAK.CCN.Chunks.Frame
                 Items.Add(item);
             }
             //Logger.Log(this);
+            //Console.ReadKey();
         }
         public override string ToString()
         {
@@ -517,7 +517,8 @@ namespace CTFAK.CCN.Chunks.Frame
         {
             var newWriter = new ByteWriter(new MemoryStream());
             newWriter.WriteInt16((short)Code);
-            Loader.Write(newWriter);
+            if (Loader != null)
+                Loader.Write(newWriter);
             Writer.WriteUInt16((ushort)(newWriter.BaseStream.Position + 2));
             Writer.WriteWriter(newWriter);
         }

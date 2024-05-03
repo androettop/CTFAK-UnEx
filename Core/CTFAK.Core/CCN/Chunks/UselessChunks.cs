@@ -120,26 +120,29 @@ namespace CTFAK.Core.CCN.Chunks
                 case 9:  // Java Mac Application
                 case 10: // Adobe Flash
                 case 11: // Java for BlackBerry
+                case 17: // MAC application
                 case 18: // XNA Windows Project
                 case 19: // XNA Xbox Project
                 case 20: // XNA Phone Project
                 case 27: // HTML5 Development
                 case 28: // HTML5 Final Project
+                case 30: // MAC application file
+                case 31: // MAC Xcode project
                 case 33: // UWP Project
                     break;
                 case 12: // Android / OUYA Application
                 case 34: // Android App Bundle
-                    Settings.gameType = Settings.GameType.ANDROID;
+                    Settings.gameType |= Settings.GameType.ANDROID;
                     break;
                 case 13: // iOS Application
                 case 14: // iOS Xcode Project
                 case 15: // Final iOS Xcode Project
-                    Settings.gameType = Settings.GameType.IOS;
+                    Settings.gameType |= Settings.GameType.IOS;
                     break;
                 case 74: // Nintendo Switch
                 case 75: // Xbox One
                 case 78: // Playstation
-                    Settings.gameType = Settings.GameType.F3;
+                    Settings.gameType |= Settings.GameType.F3;
                     break;
                 default:
                     Logger.LogWarning("Unknown Build Type: " + BuildType);

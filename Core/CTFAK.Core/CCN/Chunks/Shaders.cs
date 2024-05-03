@@ -30,6 +30,7 @@ namespace CTFAK.MMFParser.EXE.Loaders
                     var shader = new Shader();
                     shader.Read(reader);
                     ShaderList.Add(offsets.IndexOf(offset), shader);
+                    Logger.Log("Found Shader: [" + offsets.IndexOf(offset) + "] " + shader.Name + (shader == null ? " !ISNULL!" : ""));
                 }
                 catch
                 {
@@ -87,7 +88,6 @@ namespace CTFAK.MMFParser.EXE.Loaders
                     parameter.Name = reader.ReadAscii();
                 }
             }
-            ShaderGenerator.CreateAndDumpShader(this);
         }
 
         public override void Write(ByteWriter Writer)

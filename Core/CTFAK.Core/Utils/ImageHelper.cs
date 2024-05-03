@@ -13,7 +13,7 @@ namespace CTFAK.Utils
             if (modular)
                 return (bytes - width * pointSize % bytes) % bytes;
 
-            int pad = bytes - width * pointSize % bytes;
+            int pad = bytes - (width * pointSize % bytes);
             if (pad == bytes)
                 return 0;
 

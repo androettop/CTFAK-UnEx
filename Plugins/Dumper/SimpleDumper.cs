@@ -11,6 +11,8 @@ using CTFAK.Utils;
 using CTFAK.Memory;
 using System.Runtime.Intrinsics.X86;
 using System.Text.RegularExpressions;
+using CTFAK.Core.Utils;
+using CTFAK.MMFParser.EXE.Loaders;
 
 namespace Dumper
 {
@@ -32,6 +34,10 @@ namespace Dumper
             Logger.Log("Dumping packed data...");
             new PackedDumper().Execute(reader);
             Logger.Log("Packed Data dumping done");
+
+            Logger.Log("Dumping shaders...");
+            new ShaderDumper().Execute(reader);
+            Logger.Log("Shader dumping done");
         }
     }
     public class ImageDumper : IFusionTool
@@ -46,6 +52,11 @@ namespace Dumper
             var outPath = reader.getGameData().name ?? "Unknown Game";
             Regex rgx = new Regex("[^a-zA-Z0-9 -]");
             outPath = rgx.Replace(outPath, "").Trim(' ');
+            if (images == null || images.Count == 0)
+            {
+                Logger.Log("No Sounds found.");
+                return;
+            }
             Directory.CreateDirectory($"Dumps\\{outPath}\\Images");
             Task[] tasks = new Task[images.Count];
             int i = 0;
@@ -114,10 +125,20 @@ namespace Dumper
 
         public void Execute(IFileReader reader)
         {
+            if (reader.getGameData().Sounds == null)
+            {
+                Logger.Log("No Sounds found.");
+                return;
+            }
             var sounds = reader.getGameData().Sounds.Items;
             var outPath = reader.getGameData().name ?? "Unknown Game";
             Regex rgx = new Regex("[^a-zA-Z0-9 -]");
             outPath = rgx.Replace(outPath, "").Trim(' ');
+            if (sounds == null || sounds.Count == 0)
+            {
+                Logger.Log("No Sounds found.");
+                return;
+            }
             Directory.CreateDirectory($"Dumps\\{outPath}\\Sounds");
             int soundint = 0;
             foreach (var snd in sounds)
@@ -176,6 +197,36 @@ namespace Dumper
                     packedint++;
                     Progress = new int[2] { packedint, binarydata.Count + packdata.Count };
                 }
+            }
+        }
+    }
+
+    public class ShaderDumper : IFusionTool
+    {
+        public int[] Progress = new int[] { };
+        int[] IFusionTool.Progress => Progress;
+        public string Name => "Shader Dumper";
+
+        public void Execute(IFileReader reader)
+        {
+            var shaders = reader.getGameData().shaders.ShaderList;
+            var outPath = reader.getGameData().name ?? "Unknown Game";
+            Regex rgx = new Regex("[^a-zA-Z0-9 -]");
+            outPath = rgx.Replace(outPath, "").Trim(' ');
+            if (shaders == null || shaders.Count == 0)
+            {
+                Logger.Log("No Packed Data found.");
+                return;
+            }
+
+            int progress = 0;
+            string path = $"Dumps\\{outPath}\\Shaders";
+            Directory.CreateDirectory(path);
+            foreach (var shader in shaders.Values)
+            {
+                ShaderGenerator.CreateAndDumpShader(shader, path);
+                progress++;
+                Progress = new int[2] { progress, shaders.Count };
             }
         }
     }

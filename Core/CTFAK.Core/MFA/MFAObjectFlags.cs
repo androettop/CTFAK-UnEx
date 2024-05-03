@@ -35,6 +35,9 @@ namespace CTFAK.MFA
         public string Name = "";
         public bool Value;
 
+        public ObjectFlag() {}
+        public ObjectFlag(bool value) => Value = value;
+
         public override void Read(ByteReader reader)
         {
             throw new NotImplementedException();

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -10,12 +10,19 @@
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <PublishReadyToRun>true</PublishReadyToRun>!-->
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-
+		<OutputPath>..\..\build\</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\Core\CTFAK.Core\CTFAK.Core.csproj" />
     </ItemGroup>
+
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+		<Exec Command="xcopy /Y /I &quot;..\..\.resources\zlibwapi.dll*&quot; &quot;..\..\build\x64&quot;" />
+		<Exec Command="xcopy /Y /I &quot;..\..\.resources\CTFAK-Native.dll*&quot; &quot;..\..\build\x64&quot;" />
+		<Exec Command="xcopy /Y /I &quot;..\..\.resources\template.mfa*&quot; &quot;..\..\build&quot;" />
+	</Target>
 
 </Project>

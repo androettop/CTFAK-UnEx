@@ -95,7 +95,7 @@ namespace CTFAK.Core.CCN.Chunks.Banks.SoundBank
             else
                 soundData = new ByteReader(reader.ReadBytes(decompressedSize));
 
-            Name = soundData.ReadWideString(nameLenght).Trim();
+            Name = soundData.ReadYuniversal(nameLenght).Trim();
             if (Flags == 33) soundData.Seek(0);
             Data = soundData.ReadBytes((int)soundData.Size());
             //Logger.Log(Name + " || " + Handle);

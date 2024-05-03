@@ -33,7 +33,7 @@ namespace Dumper
             var images = reader.getGameData().Images.Items;
             var frames = reader.getGameData().frames;
             var objects = reader.getGameData().frameitems;
-            List<int> LostandFound = new();
+            List<int> LostandFound = new() { -1, 0, 1 };
             int imageNumber = 1;
             float curframe = 0;
             float maxdone = 0;
@@ -51,11 +51,12 @@ namespace Dumper
                 Logger.Log($"iOS\n");
             if (Settings.Old)
                 Logger.Log($"Old\n");
+            if (Settings.Normal)
+                Logger.Log($"Normal\n");
             Console.WriteLine("");
 
             foreach (var frame in frames)
-                foreach (var instance in frame.objects)
-                    maxdone++;
+                maxdone += frame.objects.Count;
 
             foreach (var frame in frames)
             {

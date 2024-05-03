@@ -12,10 +12,6 @@ namespace CTFAK.CCN.Chunks.Objects
         public int Height;
         public List<Paragraph> Items = new List<Paragraph>();
 
-
-
-
-
         public override void Read(ByteReader reader)
         {
             if (Settings.Old)
@@ -81,9 +77,6 @@ namespace CTFAK.CCN.Chunks.Objects
         public string Value;
         public Color Color;
 
-
-
-
         public override void Read(ByteReader reader)
         {
 
@@ -103,8 +96,6 @@ namespace CTFAK.CCN.Chunks.Objects
                 Color = reader.ReadColor();
                 Value = reader.ReadYuniversal();
             }
-            
-
         }
 
         public override void Write(ByteWriter Writer)

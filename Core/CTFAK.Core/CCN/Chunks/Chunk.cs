@@ -57,13 +57,9 @@ namespace CTFAK.CCN.Chunks
             }
             
             if (ChunkData == null)
-            {
-                Logger.Log($"Chunk data is null for chunk {ChunkList.ChunkNames[Id]} with flag {Flag}");
-            }
+                Logger.Log($"Chunk data is null for chunk {(ChunkList.ChunkNames.ContainsKey(Id) ? ChunkList.ChunkNames[Id] : Id)} with flag {Flag}");
             if (ChunkData?.Length == 0 && Id != 32639)
-            {
-                Logger.Log($"Chunk data is empty for chunk {ChunkList.ChunkNames[Id]} with flag {Flag}");
-            }
+                Logger.Log($"Chunk data is empty for chunk {(ChunkList.ChunkNames.ContainsKey(Id) ? ChunkList.ChunkNames[Id] : Id)} with flag {Flag}");
             return ChunkData;
         }
 

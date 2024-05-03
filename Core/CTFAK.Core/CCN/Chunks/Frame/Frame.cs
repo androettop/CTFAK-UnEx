@@ -39,10 +39,16 @@ namespace CTFAK.CCN.Chunks.Frame
                 y = reader.ReadInt32();
             }
             parentType = reader.ReadInt16();
-            parentHandle = reader.ReadInt16();
-            if (Settings.Old || Settings.F3) return;
-            layer = reader.ReadInt16();
-            instance = reader.ReadInt16();
+            if (!Settings.Old && !Settings.F3)
+            {
+                parentHandle = reader.ReadInt16();
+                layer = reader.ReadInt16();
+                instance = reader.ReadInt16();
+            }
+            else if (!Settings.F3)
+                parentHandle = reader.ReadInt16();
+            else
+                layer = reader.ReadInt16();
         }
 
         public override void Write(ByteWriter writer)
@@ -240,6 +246,8 @@ namespace CTFAK.CCN.Chunks.Frame
 
                             for (int ii = 0; ii < numberOfParams; ii++)
                             {
+                                if (shdr.Parameters.Count <= i)
+                                    continue;
                                 var param = shdr.Parameters[ii];
                                 object paramValue;
                                 switch (param.Type)

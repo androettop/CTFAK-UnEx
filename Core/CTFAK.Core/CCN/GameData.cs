@@ -27,18 +27,18 @@ namespace CTFAK.CCN
     {
         public static event CTFAKCore.SaveHandler OnChunkLoaded;
         public static event CTFAKCore.SaveHandler OnFrameLoaded;
-        public static string builddate = "7/17/23";
+        public static string builddate = "5/3/24 (EXPERIMENTAL)";
 
         public short runtimeVersion;
         public short runtimeSubversion;
         public int productVersion;
         public int productBuild;
 
-        public string name;
-        public string author="";
-        public string copyright;
-        public string aboutText;
-        public string doc;
+        public string name = string.Empty;
+        public string author = string.Empty;
+        public string copyright = string.Empty;
+        public string aboutText = string.Empty;
+        public string doc = string.Empty;
 
         public string editorFilename;
         public string targetFilename;
@@ -82,11 +82,11 @@ namespace CTFAK.CCN
             else if (magic == "CRUF") Settings.gameType = Settings.GameType.F3;
             else Logger.Log("Couldn't found any known headers: "+magic, true, ConsoleColor.Red);//Header not found
             if (CTFAKCore.parameters.Contains("-f1.5"))
-                Settings.gameType = Settings.GameType.MMF15;
+                Settings.gameType |= Settings.GameType.MMF15;
             if (CTFAKCore.parameters.Contains("-android"))
-                Settings.gameType = Settings.GameType.ANDROID;
+                Settings.gameType |= Settings.GameType.ANDROID;
             if (CTFAKCore.parameters.Contains("-f3"))
-                Settings.gameType = Settings.GameType.F3;
+                Settings.gameType |= Settings.GameType.F3;
             Logger.Log("Game Header: " + magic);
             runtimeVersion = (short)reader.ReadUInt16();
             runtimeSubversion = (short)reader.ReadUInt16();
@@ -307,7 +307,8 @@ namespace CTFAK.CCN
 
                             for (int i = 0; i < numberOfParams; i++)
                             {
-                                if (shdr.Parameters.Count < i + 1) break;
+                                if (shdr.Parameters.Count <= i)
+                                    continue;
                                 var param = shdr.Parameters[i];
                                 object paramValue;
                                 switch (param.Type)

@@ -61,7 +61,7 @@ namespace CTFAK.MFA
         {
             Writer.WriteInt32(Handle);
             Writer.AutoWriteUnicode(Name);
-            Console.WriteLine("pos: "+Writer.Tell());
+            //Console.WriteLine("pos: "+Writer.Tell());
             Writer.WriteInt32(SizeX);
             Writer.WriteInt32(SizeY);
             Writer.WriteColor(Background);
@@ -73,7 +73,7 @@ namespace CTFAK.MFA
             Writer.WriteInt32(12);
             Writer.Skip(12);
             
-            Console.WriteLine("pos: "+Writer.Tell());
+            //Console.WriteLine("pos: "+Writer.Tell());
             
             Writer.WriteInt32(LastViewedX);
             Writer.WriteInt32(LastViewedY);

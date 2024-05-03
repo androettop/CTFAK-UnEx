@@ -14,8 +14,9 @@ using CTFAK.Utils;
 public class Program
 {
     public static IFileReader gameParser;
-    public static string builddate = "7/17/23";
     public static bool didToolArg = false;
+    public static byte doAllTools = 0;
+    static Stopwatch readStopwatch = new Stopwatch();
 
     public static void Main(string[] args)
     {
@@ -27,6 +28,8 @@ public class Program
             Directory.SetCurrentDirectory(pathToContentRoot);
         }
         CTFAK.CTFAKCore.Init();
+    START:
+        Console.Clear();
         ASCIIArt.SetStatus("Idle");
         Directory.CreateDirectory("Plugins");
         Directory.CreateDirectory("Dumps");
@@ -41,7 +44,7 @@ public class Program
         ASCIIArt.DrawArt();
         Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine("by 1987kostya and Yunivers");
-        Console.WriteLine($"Running {builddate} build.\n");
+        Console.WriteLine($"Running {CTFAK.CCN.GameData.builddate} build.\n");
 
     ASK_FOR_PATH:
         ASCIIArt.SetStatus("Waiting for file");
@@ -127,16 +130,17 @@ public class Program
                         if (pluginType.GetInterface(typeof(IFileReader).FullName) != null)
                             availableReaders.Add((IFileReader)Activator.CreateInstance(pluginType));
                 }
-                //Console.Clear();
+                Console.Clear();
                 ASCIIArt.DrawArt();
                 ASCIIArt.SetStatus("Selecting tool");
                 Console.WriteLine($"{availableReaders.Count} readers(s) available\n\nSelect reader: ");
-                Console.WriteLine("0. Exit CTFAK");
+                Console.WriteLine("0. Restart CTFAK");
                 for (int i = 0; i < availableReaders.Count; i++)
                     Console.WriteLine($"{i + 1}. {availableReaders[i].Name}");
                 var key1 = Console.ReadLine();
-                var readerSelect = int.Parse(key1);
-                if (readerSelect == 0) Environment.Exit(0);
+                if (!int.TryParse(key1, out int readerSelect) || availableReaders.Count < readerSelect || readerSelect < 0)
+                    goto SELECT_TOOL;
+                if (readerSelect == 0) goto START;
                 gameParser = availableReaders[readerSelect - 1];
             }
         }
@@ -170,20 +174,20 @@ public class Program
                     foundtype = true;
         }
             
-        var readStopwatch = new Stopwatch();
-        readStopwatch.Start();
-        //Console.Clear();
+        readStopwatch.Restart();
+        Console.Clear();
         ASCIIArt.DrawArt();
         ASCIIArt.SetStatus("Reading game");
         Console.WriteLine($"Reading game with \"{gameParser.Name}\"");
         gameParser.PatchMethods();
         gameParser.LoadGame(path);
-        IFileReader game = gameParser.Copy();
         readStopwatch.Stop();
 
-        //Console.Clear();
+    SELECT_TOOL:
+        Console.Clear();
         ASCIIArt.DrawArt();
         Console.WriteLine($"Reading finished in {readStopwatch.Elapsed.TotalSeconds} seconds");
+        IFileReader game = gameParser.Copy();
             
         List<IFusionTool> availableTools = new List<IFusionTool>();
         foreach (var rawType in types)
@@ -202,26 +206,28 @@ public class Program
         }
         if (args.Contains("-closeonfinish") && !args.Contains("-tool"))
             Environment.Exit(0);
-    SELECT_TOOL:
         Console.WriteLine("");
         Console.WriteLine($"Game Information:");
         Console.WriteLine($"Game Name: "+gameParser.getGameData().name);
         Console.WriteLine($"Author: "+gameParser.getGameData().author);
         Console.WriteLine($"Number of frames: "+gameParser.getGameData().frames.Count);
         Console.WriteLine($"Fusion Build: "+ gameParser.getGameData().productBuild);
+        Console.WriteLine($"Build Type: " + Settings.GetGameTypeStr());
+        Console.WriteLine($"Exporter: " + Settings.GetExporterStr());
         Console.WriteLine("");
         ASCIIArt.SetStatus("Selecting tool");
         if (!args.Contains("-tool") && !didToolArg || didToolArg)
         {
             Console.WriteLine($"{availableTools.Count} tool(s) available\n\nSelect tool: ");
-            Console.WriteLine("0. Exit CTFAK");
+            Console.WriteLine("0. Restart CTFAK");
             for (int i = 0; i < availableTools.Count; i++)
             {
                 Console.WriteLine($"{i + 1}. {availableTools[i].Name}");
             }
             var key = Console.ReadLine();
-            var toolSelect = int.Parse(key);
-            if (toolSelect == 0) Environment.Exit(0);
+            if (!int.TryParse(key, out int toolSelect) || availableTools.Count < toolSelect || toolSelect < 0)
+                goto SELECT_TOOL;
+            if (toolSelect == 0) goto START;
             IFusionTool selectedTool = availableTools[toolSelect - 1];
             Console.WriteLine($"Selected tool: {selectedTool.Name}. Executing");
             var executeStopwatch = new Stopwatch();
@@ -253,6 +259,13 @@ public class Program
                     for (int i = 0; i < availableTools.Count; i++)
                         if (availableTools[i].Name == s)
                             tool = i;
+                        else if (s == "all")
+                        {
+                            if (doAllTools < 7 && availableTools[doAllTools].Name != "Dump Everything")
+                                tool = doAllTools;
+                            doAllTools++;
+                            break;
+                        }
 
                     if (tool == -1)
                         break;
@@ -280,9 +293,10 @@ public class Program
                 else if (s == "-tool")
                     foundarg = true;
             }
-            didToolArg = true;
+            if (doAllTools == 0 || doAllTools > 6)
+                didToolArg = true;
         }
-        if (args.Contains("-closeonfinish"))
+        if ((didToolArg || !args.Contains("-tool")) && args.Contains("-closeonfinish"))
             Environment.Exit(0);
         goto SELECT_TOOL;
     }

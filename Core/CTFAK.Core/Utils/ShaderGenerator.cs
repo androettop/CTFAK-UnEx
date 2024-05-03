@@ -7,20 +7,14 @@ namespace CTFAK.Core.Utils
 {
     public static class ShaderGenerator
     {
-        public static void CreateAndDumpShader(Shader shader)
+        public static void CreateAndDumpShader(Shader shader, string path)
         {
-            Logger.Log("Translating shader: " + shader.Name);
             var shaderName = Path.GetFileNameWithoutExtension(shader.Name);
-            var fxPath = $"Dumps\\Shaders\\{shaderName}\\{shader.Name}";
-            var xmlPath = $"Dumps\\Shaders\\{shaderName}\\{shaderName}.xml";
-            Directory.CreateDirectory($"Dumps\\Shaders\\{shaderName}");
-
-
+            var fxPath = $"{path}\\{shader.Name}";
+            var xmlPath = $"{path}\\{shaderName}.xml";
 
             File.WriteAllText(fxPath, shader.Data);
             File.WriteAllText(xmlPath, GenerateXMLContent(shader));
-
-
         }
 
         public static string GenerateXMLContent(Shader shader)

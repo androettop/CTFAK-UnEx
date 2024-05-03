@@ -60,14 +60,15 @@ namespace CTFAK.CCN.Chunks.Objects
                 switch (newChunk.Id)
                 {
                     case 17476:
+                        //File.WriteAllBytes("oichunk.bin", chunkReader.ReadBytes());
                         handle = chunkReader.ReadInt16();
                         ObjectType = chunkReader.ReadInt16();
                         Flags = chunkReader.ReadInt16();
                         chunkReader.Skip(2);
-                        InkEffect = chunkReader.ReadByte();
+                        InkEffect = chunkReader.ReadInt16();
+                        chunkReader.Skip(2);
                         if (InkEffect != 1)
                         {
-                            chunkReader.Skip(3);
                             var r = chunkReader.ReadByte();
                             var g = chunkReader.ReadByte();
                             var b = chunkReader.ReadByte();
@@ -76,13 +77,12 @@ namespace CTFAK.CCN.Chunks.Objects
                         }
                         else
                         {
-                            var flag = chunkReader.ReadByte();
-                            chunkReader.Skip(2);
-                            InkEffectValue = chunkReader.ReadByte();
-                            chunkReader.Skip(3);
+                            rgbCoeff = Color.White;
+                            blend = (byte)(255 - Math.Min(255, chunkReader.ReadByte() * 2));
+                            InkEffect = 0;
                         }
-
-                        if (Settings.Old || Settings.gameType == Settings.GameType.MMF2)
+                            
+                        if (Settings.Old || Settings.MMF2)
                         {
                             rgbCoeff = Color.White;
                             blend = 255;
@@ -110,6 +110,8 @@ namespace CTFAK.CCN.Chunks.Objects
 
                             for (int i = 0; i < numberOfParams; i++)
                             {
+                                if (shdr.Parameters.Count <= i)
+                                    continue;
                                 var param = shdr.Parameters[i];
                                 object paramValue;
                                 switch (param.Type)
