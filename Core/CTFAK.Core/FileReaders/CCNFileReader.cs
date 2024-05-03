@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Runtime.CompilerServices;
+using System.Text;
 using CTFAK.CCN;
 using CTFAK.CCN.Chunks.Banks;
 using CTFAK.FileReaders;
@@ -11,6 +13,7 @@ namespace CTFAK.EXE
 {
     public class CCNFileReader:IFileReader
     {
+        private const int wwww = 0x77777777;
         public string Name => "CCN";
         public GameData game;
         public GameData getGameData()
@@ -22,12 +25,15 @@ namespace CTFAK.EXE
         {
             CTFAKCore.currentReader = this;
             var reader = new ByteReader(gamePath, System.IO.FileMode.Open);
+            PackData? packData = null;
 
-            if (reader.PeekInt32() == 2004318071)
-                reader.Skip(32);
+            if (reader.PeekInt32() == wwww)
+                (packData = new PackData()).Read(reader);
 
             game = new GameData();
             game.Read(reader);
+            if (packData != null)
+                game.packData = packData;
         }
 
         public Dictionary<int, Bitmap> getIcons()
