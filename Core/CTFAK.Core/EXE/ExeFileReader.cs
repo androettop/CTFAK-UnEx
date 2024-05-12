@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using CTFAK.CCN.Chunks;
 using TsudaKageyu;
 using System.Runtime.CompilerServices;
+using System.IO;
 
 namespace CTFAK.FileReaders
 {
@@ -67,6 +68,16 @@ namespace CTFAK.FileReaders
             var reader = new ByteReader(gamePath, System.IO.FileMode.Open);
             ReadHeader(reader);
             PackData packData=null;
+
+            if (!reader.HasMemory(1)) // Check for Unpacked
+            {
+                string newPath = Path.ChangeExtension(gamePath, "dat");
+                if (File.Exists(newPath))
+                    reader = new ByteReader(newPath, FileMode.Open);
+                else
+                    throw new FileNotFoundException("Could not find the unpacked .dat at '" + newPath + "'");
+            }
+
             if (Settings.Old)
             {
                 Settings.Unicode = false;
@@ -104,6 +115,7 @@ namespace CTFAK.FileReaders
             var entryPoint = CalculateEntryPoint(reader);
             reader.Seek(0);
             byte[] exeHeader = reader.ReadBytes(entryPoint);
+            if (!reader.HasMemory(1)) return (int)reader.Tell();
             var firstShort = reader.PeekUInt16();
             Settings.gameType = Settings.GameType.NORMAL;
             if (firstShort != 0x7777) Settings.gameType |= Settings.GameType.MMF15;
