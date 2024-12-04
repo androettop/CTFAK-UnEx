@@ -1,3 +1,6 @@
+> [!CAUTION]
+> CTFAK 2.0 is no longer being worked on and thus has been archived, thus the same goes for this repo.
+
 # Welcome to CTFAK 2.0 (UnEx)!
 By Kostya and Yunivers
 
@@ -13,28 +16,20 @@ By Kostya and Yunivers
 | [Full Credits](https://github.com/AITYunivers/CTFAK-UnEx#full-credits) | Everyone who helped make CTFAK UnEx a reality. |
 
 # What is CTFAK UnEx?
-CTFAK UnEx (Standing for **C**lick**T**eam **F**usion **A**rmy **K**nife **Un**finished **Ex**periment) is an experimental version of a tool developed by Kostya with help from Yunivers which can be used to either decompile or dump assets of games made with the Clickteam Fusion 2.5 game engine.
+CTFAK UnEx (Standing for **C**lick**T**eam **F**usion **A**rmy **K**nife **Un**finished **Ex**periment) was an experimental version of a tool developed by Kostya with help from Yunivers which can be used to either decompile or dump assets of games made with the Clickteam Fusion 2.5 game engine.
 
-CTFAK UnEx exists only to store a version of CTFAK 2.0 I most likely will never finish and never publish on the real repo due to lack of stability.
-
-Please check out the original repository for [CTFAK 2.0](https://github.com/CTFAK/CTFAK2.0). If you need to post issues, put them in there, and if you have issues with this version, use the original.
+CTFAK UnEx existed only to store a version of CTFAK 2.0 I never finished and never published on the real repo due to lack of stability.
 
 # Installation
 ## Dependencies
-CTFAK UnEx requires [.NET 6.0's Runtime, Core Runtime, and Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
-
-After running the x64 installers for all 3 runtimes, you may proceed with the installation.
-## Installing a precompiled artifact
-
-To install an artifact, you must be logged into a Github account, then you must make your way over to [Actions](https://github.com/AITYunivers/CTFAK-UnEx/actions), and from there select the latest workflow. On that page, if you scroll down you should find `Artifacts`, from there just click on `CTFAK` and it will start downloading.
-
-From here, make your way over to [Usage](https://github.com/AITYunivers/CTFAK-UnEx#usage).
+> [!NOTE]  
+> Due to unforseen circumstances, Actions are no longer being offered. See [Compilation](https://github.com/CTFAK/CTFAK2.0#compilation)
 
 # Compilation
 ## Dependencies
-CTFAK UnEx requires [.NET 6.0's Runtime, Core Runtime, and Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
+CTFAK UnEx required [.NET 6.0's Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
 
-After running the x64 installers for all 3 runtimes, you may proceed with the compilation.
+After running the x64 installers, you may proceed with the compilation.
 
 ## Cloning the repo with Visual Studio 2022
 
@@ -46,30 +41,25 @@ In Visual Studio 2022, under `Get started`, click `Clone a repository`, then pas
 
 ## Compiling CTFAK UnEx
 
-**Compiling CTFAK is not recommended.** Please go to [installation](https://github.com/AITYunivers/CTFAK-UnEx#installation) to download CTFAK precompiled.
+Right click the solution on the right and press `Build Solution` or do it through the key bind `Control + Shift + B`, then right click the solution once again and press `Open Folder in File Explorer`.
 
-Compiling CTFAK does not get you newer features compared to the actions.
-
-If you'd like to compile CTFAK anyway, right click the solution on the right and press `Build Solution` or do it through the key bind `Control + Shift + B`, then right click the solution once again and press `Open Folder in File Explorer`.
-
-Open the `build` folder and you should be able to run `CTFAK.Cli.exe` without problems!
+Now, you should be able to run `CTFAK.Cli.exe` without problems!
 
 # Usage
-CTFAK UnEx is very easy to use and requires little input from the user.
+CTFAK UnEx was very easy to use and requires little input from the user.
 
 To get started, open `CTFAK.Cli.exe` and drag in your Clickteam Fusion 2.5 exe, apk, ccn, dat, bin, or mfa file and press enter.
 
 In parameters, you can input anything listed in [Parameters](https://github.com/AITYunivers/CTFAK-UnEx#parameters), but make sure to put a `-` before each one. If you don't want to input any parameters (which you normally shouldn't need to do) then you can leave it blank. After you've filled out your parameters, press enter.
 
-If you're using a ccn, dat, or bin file it will bring up a prompt asking you to select a file reader. In any case, press `1` for CCN.
-
-After these steps, it will start reading the application. If it closes or gives an error during this process, run `CTFAK.Cli.exe` in command prompt, repeat the process, and then send the error in our [Discord](https://www.discord.com/invite/wsH3KNtvvJ), try the original [CTFAK 2.0](https://github.com/CTFAK/CTFAK2.0), or [open an issue on the original repository](https://github.com/CTFAK/CTFAK2.0/issues).
+If you're using a ccn, dat, or bin file it will bring up a prompt asking you to select a file reader. In any case, select CCN.
 
 If all goes according to plan, you should see a screen saying `Reading finished in _ seconds` along with some information about the game. From here you may run any plugins you have installed. Normal installations should have `Export as MFA`, `Dump Everything`, `Image Dumper`, `Sound Dumper`, `Packed Data Dumper`, and `Sorted Image Dumper`.
 
 Do not use the `Restart CTFAK` option as it is non-functional. Please remember that this is an unfinished version of CTFAK.
 
-If you run into any issues with those 6 plugins, you may send the error in our [Discord](https://www.discord.com/invite/wsH3KNtvvJ), try the original [CTFAK 2.0](https://github.com/CTFAK/CTFAK2.0), or [open an issue on the original repository](https://github.com/CTFAK/CTFAK2.0/issues). If the plugin is not on that list, we cannot troubleshoot it for you.
+> [!WARNING]  
+> Please do not report any issues. CTFAK 2.0 is no longer being worked on. Please do not bother us about it.
 
 Finally, you may close CTFAK UnEx and find any outputs your plugins gave, in the `Dumps` folder.
 
@@ -121,4 +111,4 @@ All arguments should start with `-` and should be followed up by data wrapped in
 
 CTFAK 2.0 and CTFAK UnEx is licensed under [AGPL-3.0](https://github.com/CTFAK/CTFAK2.0/blob/master/LICENSE).
 
-Last Updated May 12th, 2024.
+Last Updated December 4th, 2024.
